@@ -1,0 +1,8 @@
+[package]
+
+name = "rust_tls13"
+version = "1.0.0"
+authors = [ "Daniel Saha <drs5ma@virginia.edu>" ]
+
+[dependencies]
+rustc-serialize = "0.3"
