@@ -1,3 +1,13 @@
+/// readpem.rs
+/// pub fn read_pem_file(f: String) -> Vec<u8>
+/// 
+/// reads the contents of a rsa key in pem format into a byte vector
+///
+/// file IO logic borrowed from http://rustbyexample.com/std_misc/file/open.html
+/// 
+/// 
+/// 
+
 use std::str;
 use std::error::Error;
 use std::fs::File;
@@ -7,8 +17,10 @@ use std::path::Path;
 use rustc_serialize::base64::{FromBase64};
 
 
-static BEGIN_RSA: &'static str = "-----BEGIN RSA PRIVATE KEY-----";
-static END_RSA: &'static str = "-----END RSA PRIVATE KEY-----";
+static BEGIN_PUB: &'static str= "-----BEGIN PUBLIC KEY-----";
+static END_PUB: &'static str= "-----END PUBLIC KEY-----";
+static BEGIN_PRIV: &'static str = "-----BEGIN RSA PRIVATE KEY-----";
+static END_PRIV: &'static str = "-----END RSA PRIVATE KEY-----";
 
 pub fn read_pem_file(f: String) -> Vec<u8>{
     // Path takes a reference to a string
@@ -27,8 +39,7 @@ pub fn read_pem_file(f: String) -> Vec<u8>{
     let mut data_string = String::new();
 
     match file.read_to_string(&mut data_string) {
-        Err(why) => panic!("couldn't read {}: {}", display,
-                           why.description()),
+        Err(why) => panic!("couldn't read file as string: {}",why.description() ),
 
         Ok(_) => {}, //print!("{} contains:\n{}", display, data_string),
     }
@@ -39,16 +50,21 @@ pub fn read_pem_file(f: String) -> Vec<u8>{
     
     let lines = data_string.split("\n");
     for s in lines {
-        if s == BEGIN_RSA{}
-        else if s == END_RSA{}
+        if s == BEGIN_PUB{}
+        else if s == BEGIN_PRIV{}
+        else if s== END_PUB{}
+        else if s == END_PRIV{}
         else { b64_string = b64_string + s.trim(); }
     }
     
 
    
-    //couldn't fiugre out how to do proper error handling for b64 decode using match
-    let bytes:Vec<u8> = b64_string.from_base64().unwrap();
-
+    // "Rust way" of handling errors, similar to inline conditional notation 
+    let bytes = match b64_string.from_base64() {
+        Ok(value) => value,
+        Err(err)=> panic!("base 64 decoding failed: {}", err),
+    };    
+    
     //return Vec<u8> representing the bytes of the base64 decoded pem key
     bytes
     
